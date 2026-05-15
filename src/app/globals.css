@@ -1,26 +1,258 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
+
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-brand-cream: #FAF8F5;
+  --color-brand-beige: #F0EBE1;
+  --color-brand-sand: #E8DDD0;
+  --color-brand-warm: #D4C5B0;
+  --color-brand-taupe: #B8A898;
+  --color-brand-gray: #8C8579;
+  --color-brand-charcoal: #4A4440;
+  --color-brand-black: #1A1A1A;
+  --color-brand-teal: #7BA7A0;
+  --color-brand-teal-light: #A8C5C0;
+  --color-brand-gold: #C9A96E;
+  --color-brand-gold-light: #E3C98A;
+
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Jost', system-ui, sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --brand-cream: #FAF8F5;
+    --brand-beige: #F0EBE1;
+    --brand-sand: #E8DDD0;
+    --brand-warm: #D4C5B0;
+    --brand-taupe: #B8A898;
+    --brand-gray: #8C8579;
+    --brand-charcoal: #4A4440;
+    --brand-black: #1A1A1A;
+    --brand-teal: #7BA7A0;
+    --brand-gold: #C9A96E;
   }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: #FAF8F5;
+    color: #1A1A1A;
+    font-family: 'Jost', system-ui, sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  ::selection {
+    background: #C9A96E;
+    color: #1A1A1A;
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #FAF8F5; }
+  ::-webkit-scrollbar-thumb { background: #D4C5B0; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #8C8579; }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Utility classes using plain CSS (not @apply with custom colors) */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 2rem;
+  background-color: #1A1A1A;
+  color: #FAF8F5;
+  font-family: 'Jost', system-ui, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: all 0.5s ease;
+  cursor: pointer;
+  text-decoration: none;
+  border: none;
 }
+.btn-primary:hover { background-color: #4A4440; transform: scale(1.02); }
+.btn-primary:active { transform: scale(0.98); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 2rem;
+  border: 1px solid #1A1A1A;
+  color: #1A1A1A;
+  background: transparent;
+  font-family: 'Jost', system-ui, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: all 0.5s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn-outline:hover { background-color: #1A1A1A; color: #FAF8F5; transform: scale(1.02); }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  color: #8C8579;
+  font-family: 'Jost', system-ui, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn-ghost:hover { color: #1A1A1A; }
+
+.btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #25D366;
+  color: white;
+  font-family: 'Jost', system-ui, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+.btn-whatsapp:hover { background-color: #1DAA52; transform: scale(1.02); }
+
+.section-heading {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2rem, 5vw, 3.75rem);
+  color: #1A1A1A;
+  font-weight: 500;
+}
+
+.section-subheading {
+  font-family: 'Jost', system-ui, sans-serif;
+  font-size: 0.875rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #8C8579;
+  font-weight: 400;
+}
+
+.glass-nav {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background-color: rgba(255,255,255,0.10);
+  border-bottom: 1px solid rgba(255,255,255,0.20);
+}
+
+.glass-nav-scrolled {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background-color: rgba(255,255,255,0.95);
+  border-bottom: 1px solid #E8DDD0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.label-chip {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-family: 'Jost', system-ui, sans-serif;
+  color: #8C8579;
+  border: 1px solid #E8DDD0;
+}
+
+.input-luxury {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #D4C5B0;
+  padding: 0.75rem 0;
+  color: #1A1A1A;
+  font-family: 'Jost', system-ui, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 300;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+.input-luxury::placeholder { color: #B8A898; }
+.input-luxury:focus { border-bottom-color: #1A1A1A; }
+
+.divider-line {
+  width: 3rem;
+  height: 1px;
+  background-color: #C9A96E;
+}
+
+.masonry-grid {
+  column-count: 2;
+  column-gap: 1rem;
+}
+@media (min-width: 768px) { .masonry-grid { column-count: 3; } }
+@media (min-width: 1024px) { .masonry-grid { column-count: 4; } }
+
+.masonry-item {
+  break-inside: avoid;
+  margin-bottom: 1rem;
+}
+
+.overlay-gradient {
+  background: linear-gradient(to top, rgba(26,26,26,0.8) 0%, rgba(26,26,26,0.2) 50%, transparent 100%);
+}
+
+.font-light-serif {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 300;
+  font-style: italic;
+}
+
+.admin-sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-family: 'Jost', system-ui, sans-serif;
+  color: #8C8579;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+.admin-sidebar-link:hover { color: #1A1A1A; background-color: #F0EBE1; }
+.admin-sidebar-link.active { color: #1A1A1A; background-color: #F0EBE1; font-weight: 500; }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
