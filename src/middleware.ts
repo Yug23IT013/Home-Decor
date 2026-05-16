@@ -10,6 +10,11 @@ export default auth((req) => {
       const loginUrl = new URL('/admin/login', req.url);
       return NextResponse.redirect(loginUrl);
     }
+    
+    // Check if role is admin
+    if ((req.auth.user as { role?: string })?.role !== 'admin') {
+      return NextResponse.redirect(new URL('/', req.url));
+    }
   }
 
   return NextResponse.next();

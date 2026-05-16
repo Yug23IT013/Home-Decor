@@ -6,6 +6,12 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { z } from 'zod';
+
+const loginSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -17,18 +23,32 @@ export default function AdminLogin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const res = await signIn('credentials', {
-      email,
-      password,
-      redirect: false,
-    });
-    if (res?.ok) {
-      toast.success('Welcome back!');
-      router.push('/admin/dashboard');
-    } else {
-      toast.error('Invalid credentials');
+
+    try {
+      // Validate input
+      loginSchema.parse({ email, password });
+
+      const res = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (res?.error) {
+        toast.error('Invalid email or password');
+      } else {
+        toast.success('Welcome back!');
+        router.push('/admin/dashboard');
+      }
+    } catch (err: any) {
+      if (err instanceof z.ZodError) {
+        err.issues.forEach((issue) => toast.error(issue.message));
+      } else {
+        toast.error('An unexpected error occurred');
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

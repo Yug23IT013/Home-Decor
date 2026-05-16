@@ -16,11 +16,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const adminEmail = process.env.ADMIN_EMAIL;
         const adminPassword = process.env.ADMIN_PASSWORD;
 
-        if (!adminEmail || !adminPassword) return null;
+        console.log('Login attempt:', { 
+          providedEmail: credentials.email, 
+          expectedEmail: adminEmail,
+          matches: credentials.email === adminEmail 
+        });
+
+        if (!adminEmail || !adminPassword) {
+          console.error('Admin credentials missing in environment variables');
+          return null;
+        }
 
         if (credentials.email !== adminEmail) return null;
 
-        // For simple setup, compare plain text; in production use bcrypt hash
+        // For simple setup, compare plain text
         const isValid = credentials.password === adminPassword;
         if (!isValid) return null;
 

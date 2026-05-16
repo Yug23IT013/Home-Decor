@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Inquiry from '@/models/Inquiry';
 import nodemailer from 'nodemailer';
+import { auth } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,6 +54,11 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   try {
+    const session = await auth();
+    if (!session || session.user?.role !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     await connectDB();
     const inquiries = await Inquiry.find().sort({ createdAt: -1 }).limit(100);
     return NextResponse.json({ inquiries });

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
+import { auth } from '@/lib/auth';
 
 // Cloudinary config
 cloudinary.config({
@@ -10,6 +11,11 @@ cloudinary.config({
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
+    if (!session || session.user?.role !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
 

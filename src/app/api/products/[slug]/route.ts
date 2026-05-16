@@ -1,6 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
+import { auth } from '@/lib/auth';
+import { z } from 'zod';
+
+const productUpdateSchema = z.object({
+  name: z.string().min(2).optional(),
+  description: z.string().min(10).optional(),
+  shortDescription: z.string().max(200).optional(),
+  category: z.string().min(1).optional(),
+  style: z.string().optional(),
+  material: z.string().optional(),
+  price: z.number().optional(),
+  images: z.array(z.string()).min(1).optional(),
+  dimensions: z.object({
+    width: z.string().optional(),
+    height: z.string().optional(),
+    depth: z.string().optional(),
+    weight: z.string().optional(),
+  }).optional(),
+  tags: z.array(z.string()).optional(),
+  featured: z.boolean().optional(),
+  active: z.boolean().optional(),
+});
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
@@ -23,19 +45,36 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ slu
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
+    const session = await auth();
+    if (!session || session.user?.role !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     await connectDB();
     const { slug } = await params;
     const body = await req.json();
-    const product = await Product.findOneAndUpdate({ slug }, body, { new: true });
+
+    // Validate body
+    const validatedData = productUpdateSchema.parse(body);
+
+    const product = await Product.findOneAndUpdate({ slug }, validatedData, { new: true });
     if (!product) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     return NextResponse.json({ product });
-  } catch {
+  } catch (err: any) {
+    if (err instanceof z.ZodError) {
+      return NextResponse.json({ error: 'Validation failed', details: err.issues }, { status: 400 });
+    }
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
+    const session = await auth();
+    if (!session || session.user?.role !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     await connectDB();
     const { slug } = await params;
     await Product.findOneAndDelete({ slug });
