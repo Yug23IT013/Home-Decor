@@ -1,21 +1,30 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 
-const categories = [
+const FALLBACK_CATEGORIES = [
   { name: 'Wall Decor', slug: 'wall-decor', image: '/cat-wall-decor.png', count: '24 Pieces' },
   { name: 'Showpieces', slug: 'showpieces', image: '/cat-showpieces.png', count: '18 Pieces' },
   { name: 'Mirrors', slug: 'mirrors', image: '/cat-mirrors.png', count: '12 Pieces' },
   { name: 'Table Decor', slug: 'table-decor', image: '/cat-showpieces.png', count: '20 Pieces' },
-  { name: 'Handmade Decor', slug: 'handmade-decor', image: '/cat-wall-decor.png', count: '16 Pieces' },
-  { name: 'Luxury Accessories', slug: 'luxury-accessories', image: '/cat-mirrors.png', count: '10 Pieces' },
-  { name: 'Modern Decor', slug: 'modern-decor', image: '/cat-showpieces.png', count: '22 Pieces' },
-  { name: 'Traditional Decor', slug: 'traditional-decor', image: '/cat-wall-decor.png', count: '14 Pieces' },
 ];
 
 export default function CategoriesSection() {
+  const [categories, setCategories] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/categories')
+      .then(res => res.json())
+      .then(data => {
+        const fetched = data.categories || [];
+        setCategories(fetched.length > 0 ? fetched : FALLBACK_CATEGORIES);
+      })
+      .catch(() => setCategories(FALLBACK_CATEGORIES));
+  }, []);
+
   return (
     <section className="py-24 bg-brand-cream" id="categories">
       <div className="max-w-7xl mx-auto px-6">
@@ -36,7 +45,7 @@ export default function CategoriesSection() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {categories.map((cat, i) => (
             <motion.div
-              key={cat.slug}
+              key={cat.slug || cat.name}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -44,7 +53,7 @@ export default function CategoriesSection() {
             >
               <Link href={`/categories/${cat.slug}`} className="group block relative overflow-hidden aspect-[3/4] bg-brand-beige">
                 <Image
-                  src={cat.image}
+                  src={cat.image || '/cat-showpieces.png'}
                   alt={cat.name}
                   fill
                   className="object-cover transition-transform duration-700 group-hover:scale-110"
@@ -53,7 +62,9 @@ export default function CategoriesSection() {
                 <div className="absolute inset-0 overlay-gradient" />
                 <div className="absolute bottom-0 left-0 right-0 p-5">
                   <h3 className="font-serif text-white text-xl font-[500] leading-tight">{cat.name}</h3>
-                  <p className="font-sans text-white/60 text-xs tracking-[0.1em] mt-1">{cat.count}</p>
+                  <p className="font-sans text-white/60 text-xs tracking-[0.1em] mt-1">
+                    {cat.count ? cat.count : 'Explore Collection'}
+                  </p>
                 </div>
                 <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="w-8 h-8 bg-white/20 backdrop-blur-sm flex items-center justify-center">

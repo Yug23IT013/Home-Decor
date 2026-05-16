@@ -58,7 +58,7 @@ export default function HeroSection() {
           <Link href="/gallery" className="inline-flex items-center gap-2 px-8 py-3.5 border border-white/50 text-white text-sm font-sans font-[400] tracking-[0.12em] uppercase transition-all duration-500 hover:bg-white hover:text-brand-black">
             View Gallery
           </Link>
-          <Link href="/contact" className="btn-ghost text-white/70 hover:text-white">
+          <Link href="/contact" className="inline-flex items-center gap-2 px-8 py-3.5 border border-white/50 text-white text-sm font-sans font-[400] tracking-[0.12em] uppercase transition-all duration-500 hover:bg-white hover:text-brand-black">
             Contact Us <ArrowRight size={14} />
           </Link>
         </motion.div>

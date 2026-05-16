@@ -2,22 +2,53 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Package, MessageSquare, Image as ImageIcon, Star, TrendingUp, Clock, Eye } from 'lucide-react';
-import { SEED_PRODUCTS, SEED_TESTIMONIALS } from '@/lib/seedData';
-
-const stats = [
-  { label: 'Total Products', value: SEED_PRODUCTS.length, icon: Package, color: 'bg-brand-black', href: '/admin/products' },
-  { label: 'New Inquiries', value: 3, icon: MessageSquare, color: 'bg-brand-teal', href: '/admin/inquiries' },
-  { label: 'Gallery Items', value: 8, icon: ImageIcon, color: 'bg-brand-gold', href: '/admin/gallery' },
-  { label: 'Testimonials', value: SEED_TESTIMONIALS.length, icon: Star, color: 'bg-brand-charcoal', href: '/admin/testimonials' },
-];
+import { Package, MessageSquare, Image as ImageIcon, Star, TrendingUp, Clock } from 'lucide-react';
 
 export default function AdminDashboard() {
-  const [recentInquiries] = useState([
-    { name: 'Priya Sharma', product: 'Gold Leaf Mirror', time: '2 hours ago', status: 'new' },
-    { name: 'Rahul Mehta', product: 'Arch Frame Wall Art', time: '5 hours ago', status: 'read' },
-    { name: 'Sunita Patel', product: 'General Inquiry', time: '1 day ago', status: 'replied' },
-  ]);
+  const [stats, setStats] = useState({ products: 0, newInquiries: 0, gallery: 0, testimonials: 0 });
+  const [recentInquiries, setRecentInquiries] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Fetch all counts in parallel
+    Promise.all([
+      fetch('/api/products').then(r => r.json()),
+      fetch('/api/inquiries').then(r => r.json()),
+      fetch('/api/gallery').then(r => r.json()),
+      fetch('/api/testimonials').then(r => r.json()),
+    ]).then(([products, inquiries, gallery, testimonials]) => {
+      const allInquiries = inquiries.inquiries || [];
+      setStats({
+        products: (products.products || []).length,
+        newInquiries: allInquiries.filter((i: any) => i.status === 'new' || !i.status).length,
+        gallery: (gallery.gallery || []).length,
+        testimonials: (testimonials.testimonials || []).length,
+      });
+      setRecentInquiries(allInquiries.slice(0, 5));
+    });
+  }, []);
+
+  const formatTime = (iso: string) => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const diff = Date.now() - d.getTime();
+    const h = Math.floor(diff / 3600000);
+    if (h < 1) return 'Just now';
+    if (h < 24) return `${h}h ago`;
+    return `${Math.floor(h / 24)}d ago`;
+  };
+
+  const statCards = [
+    { label: 'Total Products', value: stats.products, icon: Package, color: 'bg-brand-black', href: '/admin/products' },
+    { label: 'New Inquiries', value: stats.newInquiries, icon: MessageSquare, color: 'bg-brand-teal', href: '/admin/inquiries' },
+    { label: 'Gallery Items', value: stats.gallery, icon: ImageIcon, color: 'bg-brand-gold', href: '/admin/gallery' },
+    { label: 'Testimonials', value: stats.testimonials, icon: Star, color: 'bg-brand-charcoal', href: '/admin/testimonials' },
+  ];
+
+  const statusColors: Record<string, string> = {
+    new: 'bg-brand-gold/20 text-brand-charcoal',
+    read: 'bg-blue-50 text-blue-600',
+    replied: 'bg-green-50 text-green-600',
+  };
 
   return (
     <div>
@@ -28,7 +59,7 @@ export default function AdminDashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {stats.map(({ label, value, icon: Icon, color, href }) => (
+        {statCards.map(({ label, value, icon: Icon, color, href }) => (
           <Link key={label} href={href} className="bg-white border border-brand-sand p-6 hover:shadow-md transition-shadow group">
             <div className="flex items-start justify-between mb-4">
               <div className={`w-10 h-10 ${color} flex items-center justify-center`}>
@@ -52,27 +83,26 @@ export default function AdminDashboard() {
             </Link>
           </div>
           <div className="space-y-4">
+            {recentInquiries.length === 0 && (
+              <p className="font-sans text-sm text-brand-gray text-center py-6">No inquiries yet.</p>
+            )}
             {recentInquiries.map((inq, i) => (
-              <div key={i} className="flex items-center justify-between py-3 border-b border-brand-sand last:border-0">
+              <div key={inq._id || i} className="flex items-center justify-between py-3 border-b border-brand-sand last:border-0">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-brand-beige flex items-center justify-center font-serif text-sm text-brand-black">
-                    {inq.name[0]}
+                    {inq.name?.[0] || '?'}
                   </div>
                   <div>
                     <p className="font-sans text-sm text-brand-black font-[500]">{inq.name}</p>
-                    <p className="font-sans text-xs text-brand-gray">{inq.product}</p>
+                    <p className="font-sans text-xs text-brand-gray">{inq.productName || 'General Inquiry'}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className={`px-2 py-0.5 text-[10px] uppercase tracking-wider font-sans ${
-                    inq.status === 'new' ? 'bg-brand-gold/20 text-brand-charcoal' :
-                    inq.status === 'read' ? 'bg-blue-50 text-blue-600' :
-                    'bg-green-50 text-green-600'
-                  }`}>
-                    {inq.status}
+                  <span className={`px-2 py-0.5 text-[10px] uppercase tracking-wider font-sans ${statusColors[inq.status || 'new'] || statusColors.new}`}>
+                    {inq.status || 'new'}
                   </span>
                   <span className="font-sans text-xs text-brand-gray flex items-center gap-1">
-                    <Clock size={10} /> {inq.time}
+                    <Clock size={10} /> {formatTime(inq.createdAt)}
                   </span>
                 </div>
               </div>
@@ -95,11 +125,9 @@ export default function AdminDashboard() {
               </Link>
             ))}
           </div>
-
-          {/* View site link */}
           <div className="mt-6 pt-6 border-t border-brand-sand">
             <Link href="/" target="_blank" className="flex items-center gap-2 font-sans text-xs text-brand-gray hover:text-brand-black transition-colors">
-              <Eye size={14} /> Preview Live Site
+              Preview Live Site →
             </Link>
           </div>
         </div>

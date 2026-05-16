@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 import { ArrowLeft, Save, Plus, X, Upload } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { CATEGORIES, STYLES, MATERIALS } from '@/lib/seedData';
+
 
 const schema = z.object({
   name: z.string().min(2),
@@ -37,6 +37,9 @@ export default function EditProductPage({ params }: { params: Promise<{ slug: st
   const [uploadingImage, setUploadingImage] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
+  const [dynamicCategories, setDynamicCategories] = useState<any[]>([]);
+  const [dynamicStyles, setDynamicStyles] = useState<string[]>([]);
+  const [dynamicMaterials, setDynamicMaterials] = useState<string[]>([]);
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -46,6 +49,13 @@ export default function EditProductPage({ params }: { params: Promise<{ slug: st
     fetch(`/api/products/${slug}`)
       .then(res => res.json())
       .then(data => {
+        // Fetch dropdown options concurrently
+        fetch('/api/categories').then(r => r.json()).then(catData => setDynamicCategories(catData.categories || []));
+        fetch('/api/products').then(r => r.json()).then(prodData => {
+          const prods = prodData.products || [];
+          setDynamicStyles(Array.from(new Set(prods.map((p: any) => p.style))).filter(Boolean) as string[]);
+          setDynamicMaterials(Array.from(new Set(prods.map((p: any) => p.material))).filter(Boolean) as string[]);
+        });
         if (data.product) {
           const p = data.product;
           setValue('name', p.name);
@@ -269,7 +279,7 @@ export default function EditProductPage({ params }: { params: Promise<{ slug: st
               <label className={labelCls}>Category *</label>
               <select {...register('category')} className={inputCls}>
                 <option value="">Select category</option>
-                {CATEGORIES.map((c) => <option key={c.slug} value={c.name}>{c.name}</option>)}
+                {dynamicCategories.map((c) => <option key={c.slug || c.name} value={c.name}>{c.name}</option>)}
               </select>
               {errors.category && <p className={errorCls}>{errors.category.message}</p>}
             </div>
@@ -277,14 +287,14 @@ export default function EditProductPage({ params }: { params: Promise<{ slug: st
               <label className={labelCls}>Style</label>
               <select {...register('style')} className={inputCls}>
                 <option value="">Select style</option>
-                {STYLES.map((s) => <option key={s.slug} value={s.name}>{s.name}</option>)}
+                {dynamicStyles.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
             <div>
               <label className={labelCls}>Material</label>
               <select {...register('material')} className={inputCls}>
                 <option value="">Select material</option>
-                {MATERIALS.map((m) => <option key={m} value={m}>{m}</option>)}
+                {dynamicMaterials.map((m) => <option key={m} value={m}>{m}</option>)}
               </select>
             </div>
             <div className="flex items-center gap-2 pt-2">

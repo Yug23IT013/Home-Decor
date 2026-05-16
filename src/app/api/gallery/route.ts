@@ -20,7 +20,8 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const item = await Gallery.create(body);
     return NextResponse.json({ item }, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  } catch (error: any) {
+    console.error('Gallery creation error:', error);
+    return NextResponse.json({ error: 'Server error', details: error.message }, { status: 500 });
   }
 }

@@ -49,7 +49,7 @@ export default function NewGalleryImagePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           title: title || 'New Gallery Item', 
-          imageUrl: imageUrl || '/hero-interior.png', 
+          image: imageUrl || '/hero-interior.png', 
           caption 
         }),
       });

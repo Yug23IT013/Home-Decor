@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,7 +9,6 @@ import toast from 'react-hot-toast';
 import { ArrowLeft, Save, Plus, X, Upload } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { CATEGORIES, STYLES, MATERIALS } from '@/lib/seedData';
 
 const schema = z.object({
   name: z.string().min(2),
@@ -35,6 +34,21 @@ export default function NewProductPage() {
   const [images, setImages] = useState<string[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [dynamicCategories, setDynamicCategories] = useState<any[]>([]);
+  const [dynamicStyles, setDynamicStyles] = useState<string[]>([]);
+  const [dynamicMaterials, setDynamicMaterials] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Fetch categories
+    fetch('/api/categories').then(r => r.json()).then(data => setDynamicCategories(data.categories || []));
+    
+    // Fetch products to extract unique styles and materials
+    fetch('/api/products').then(r => r.json()).then(data => {
+      const prods = data.products || [];
+      setDynamicStyles(Array.from(new Set(prods.map((p: any) => p.style))).filter(Boolean) as string[]);
+      setDynamicMaterials(Array.from(new Set(prods.map((p: any) => p.material))).filter(Boolean) as string[]);
+    });
+  }, []);
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -237,7 +251,7 @@ export default function NewProductPage() {
               <label className={labelCls}>Category *</label>
               <select {...register('category')} className={inputCls}>
                 <option value="">Select category</option>
-                {CATEGORIES.map((c) => <option key={c.slug} value={c.name}>{c.name}</option>)}
+                {dynamicCategories.map((c) => <option key={c.slug || c.name} value={c.name}>{c.name}</option>)}
               </select>
               {errors.category && <p className={errorCls}>{errors.category.message}</p>}
             </div>
@@ -245,14 +259,14 @@ export default function NewProductPage() {
               <label className={labelCls}>Style</label>
               <select {...register('style')} className={inputCls}>
                 <option value="">Select style</option>
-                {STYLES.map((s) => <option key={s.slug} value={s.name}>{s.name}</option>)}
+                {dynamicStyles.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
             <div>
               <label className={labelCls}>Material</label>
               <select {...register('material')} className={inputCls}>
                 <option value="">Select material</option>
-                {MATERIALS.map((m) => <option key={m} value={m}>{m}</option>)}
+                {dynamicMaterials.map((m) => <option key={m} value={m}>{m}</option>)}
               </select>
             </div>
             <div className="flex items-center gap-2 pt-2">

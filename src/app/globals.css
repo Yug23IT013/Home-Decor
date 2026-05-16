@@ -195,7 +195,8 @@
   background: transparent;
   border: none;
   border-bottom: 1px solid #D4C5B0;
-  padding: 0.75rem 0;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
   color: #1A1A1A;
   font-family: 'Jost', system-ui, sans-serif;
   font-size: 0.875rem;

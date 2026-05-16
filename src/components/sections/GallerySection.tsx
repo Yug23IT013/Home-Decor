@@ -1,28 +1,89 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { X, ZoomIn } from 'lucide-react';
 
-const galleryItems = [
-  { id: 1, src: '/gallery-1.png', title: 'Living Room Elegance', category: 'Interior' },
-  { id: 2, src: '/gallery-2.png', title: 'Bedroom Details', category: 'Bedroom' },
-  { id: 3, src: '/hero-interior.png', title: 'Arched Luxury', category: 'Living Room' },
-  { id: 4, src: '/cat-wall-decor.png', title: 'Wall Art Collection', category: 'Wall Decor' },
-  { id: 5, src: '/cat-showpieces.png', title: 'Showpiece Display', category: 'Showpieces' },
-  { id: 6, src: '/cat-mirrors.png', title: 'Mirror Gallery', category: 'Mirrors' },
-  { id: 7, src: '/style-modern-minimal.png', title: 'Minimal Spaces', category: 'Interior' },
-  { id: 8, src: '/style-luxury-gold.png', title: 'Gold Accents', category: 'Luxury' },
+type GalleryItem = {
+  _id: string;
+  title: string;
+  imageUrl: string;
+  caption?: string;
+  category?: string;
+};
+
+const FALLBACK_ITEMS: GalleryItem[] = [
+  { _id: '1', imageUrl: '/gallery-1.png', title: 'Living Room Elegance', category: 'Interior' },
+  { _id: '2', imageUrl: '/gallery-2.png', title: 'Bedroom Details', category: 'Bedroom' },
+  { _id: '3', imageUrl: '/hero-interior.png', title: 'Arched Luxury', category: 'Living Room' },
+  { _id: '4', imageUrl: '/cat-wall-decor.png', title: 'Wall Art Collection', category: 'Wall Decor' },
+  { _id: '5', imageUrl: '/cat-showpieces.png', title: 'Showpiece Display', category: 'Showpieces' },
+  { _id: '6', imageUrl: '/cat-mirrors.png', title: 'Mirror Gallery', category: 'Mirrors' },
+  { _id: '7', imageUrl: '/style-modern-minimal.png', title: 'Minimal Spaces', category: 'Interior' },
+  { _id: '8', imageUrl: '/style-luxury-gold.png', title: 'Gold Accents', category: 'Luxury' },
 ];
 
-export default function GallerySection() {
-  const [selected, setSelected] = useState<(typeof galleryItems)[0] | null>(null);
+function GalleryImg({
+  item, i, className,
+}: {
+  item: GalleryItem; i: number; className: string;
+  onClick?: () => void;
+}) {
+  return null; // placeholder — component below handles it inline
+}
+
+export default function GallerySection({
+  showViewAll = true,
+  limit = 8,
+}: {
+  showViewAll?: boolean;
+  limit?: number;
+}) {
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
+  const [selected, setSelected] = useState<GalleryItem | null>(null);
+
+  useEffect(() => {
+    fetch('/api/gallery')
+      .then(r => r.json())
+      .then(data => {
+        const items: GalleryItem[] = data.gallery || [];
+        setGalleryItems(items.length > 0 ? items : FALLBACK_ITEMS);
+      })
+      .catch(() => setGalleryItems(FALLBACK_ITEMS));
+  }, []);
+
+  const items = galleryItems.slice(0, limit);
+  const src = (item: GalleryItem) => item.imageUrl || '/gallery-1.png';
+
+  const Card = ({ item, i, className }: { item: GalleryItem; i: number; className: string }) => (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, delay: i * 0.06 }}
+      className={`relative overflow-hidden group cursor-pointer bg-brand-beige ${className}`}
+      onClick={() => setSelected(item)}
+    >
+      <Image
+        src={src(item)}
+        alt={item.title}
+        fill
+        className="object-cover transition-transform duration-700 group-hover:scale-105"
+        sizes="(max-width: 768px) 50vw, 25vw"
+        onError={(e) => { (e.target as HTMLImageElement).src = '/gallery-1.png'; }}
+      />
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-500 flex items-center justify-center">
+        <ZoomIn size={22} className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      </div>
+    </motion.div>
+  );
 
   return (
     <section className="py-24 bg-brand-cream" id="gallery">
       <div className="max-w-7xl mx-auto px-6">
+        {/* Heading */}
         <motion.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 30 }}
@@ -35,37 +96,55 @@ export default function GallerySection() {
           <h2 className="section-heading">Interior Gallery</h2>
         </motion.div>
 
-        {/* Masonry Grid */}
-        <div className="masonry-grid">
-          {galleryItems.map((item, i) => (
-            <motion.div
-              key={item.id}
-              className="masonry-item group cursor-pointer relative overflow-hidden"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.06 }}
-              onClick={() => setSelected(item)}
-            >
-              <div className={`relative ${i % 3 === 0 ? 'aspect-[3/4]' : 'aspect-square'}`}>
-                <Image
-                  src={item.src}
-                  alt={item.title}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
-                  sizes="(max-width: 768px) 50vw, 25vw"
-                />
-                <div className="absolute inset-0 bg-brand-black/0 group-hover:bg-brand-black/30 transition-colors duration-500 flex items-center justify-center">
-                  <ZoomIn size={24} className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                </div>
-              </div>
-            </motion.div>
-          ))}
+        {/* Structured editorial grid — 4 columns, 2 rows */}
+        {/* Row 1: tall-left | sq | sq | tall-right */}
+        {/* Row 2: wide | wide | sq  */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+
+          {/* Row 1 - col 1: tall portrait, spans 2 rows */}
+          {items[0] && (
+            <div className="md:row-span-2">
+              <Card item={items[0]} i={0} className="h-48 md:h-full min-h-[320px]" />
+            </div>
+          )}
+
+          {/* Row 1 - col 2: square */}
+          {items[1] && <Card item={items[1]} i={1} className="h-48 md:h-40" />}
+
+          {/* Row 1 - col 3: square */}
+          {items[2] && <Card item={items[2]} i={2} className="h-48 md:h-40" />}
+
+          {/* Row 1 - col 4: tall portrait, spans 2 rows */}
+          {items[3] && (
+            <div className="md:row-span-2">
+              <Card item={items[3]} i={3} className="h-48 md:h-full min-h-[320px]" />
+            </div>
+          )}
+
+          {/* Row 2 - col 2: square */}
+          {items[4] && <Card item={items[4]} i={4} className="h-48 md:h-40" />}
+
+          {/* Row 2 - col 3: square */}
+          {items[5] && <Card item={items[5]} i={5} className="h-48 md:h-40" />}
+
+          {/* Row 3: 3 equal landscape cards spanning full width (cols 1–3, 1–2, 1–1) */}
+          {items[6] && (
+            <div className="col-span-2 md:col-span-2">
+              <Card item={items[6]} i={6} className="h-52 w-full" />
+            </div>
+          )}
+          {items[7] && (
+            <div className="col-span-2 md:col-span-2">
+              <Card item={items[7]} i={7} className="h-52 w-full" />
+            </div>
+          )}
         </div>
 
-        <div className="text-center mt-12">
-          <Link href="/gallery" className="btn-outline">View Full Gallery</Link>
-        </div>
+        {showViewAll && (
+          <div className="text-center mt-12">
+            <Link href="/gallery" className="btn-outline">View Full Gallery</Link>
+          </div>
+        )}
       </div>
 
       {/* Lightbox */}
@@ -93,11 +172,12 @@ export default function GallerySection() {
               onClick={(e) => e.stopPropagation()}
             >
               <Image
-                src={selected.src}
+                src={src(selected)}
                 alt={selected.title}
                 width={1200}
                 height={900}
                 className="w-full h-full object-contain max-h-[80vh]"
+                onError={(e) => { (e.target as HTMLImageElement).src = '/gallery-1.png'; }}
               />
               <p className="text-white/60 text-sm font-sans text-center mt-4 tracking-[0.1em]">{selected.title}</p>
             </motion.div>

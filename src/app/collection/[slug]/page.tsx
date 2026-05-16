@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { notFound } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -10,8 +10,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
 import { ArrowLeft, MessageCircle, ChevronLeft, ChevronRight, Ruler, Package, Tag, Send } from 'lucide-react';
-import { SEED_PRODUCTS } from '@/lib/seedData';
-import { use } from 'react';
+
+const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919876543210';
 
 const schema = z.object({
   name: z.string().min(2),
@@ -21,35 +21,69 @@ const schema = z.object({
 });
 type FormData = z.infer<typeof schema>;
 
-export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params);
-  const product = SEED_PRODUCTS.find((p) => p.slug === slug);
-  if (!product) notFound();
+export default function ProductDetailPage() {
+  const params = useParams();
+  const slug = params.slug as string;
 
-  const images = product.images.length > 0 ? product.images : ['/cat-showpieces.png', '/cat-wall-decor.png'];
+  const [product, setProduct] = useState<any>(null);
+  const [related, setRelated] = useState<any[]>([]);
+  const [notFound, setNotFound] = useState(false);
   const [activeImg, setActiveImg] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const related = SEED_PRODUCTS.filter((p) => p.category === product.category && p.slug !== slug).slice(0, 4);
+  useEffect(() => {
+    if (!slug) return;
+    fetch(`/api/products/${slug}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.product) {
+          setProduct(data.product);
+          setRelated(data.related || []);
+        } else {
+          setNotFound(true);
+        }
+      })
+      .catch(() => setNotFound(true));
+  }, [slug]);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { message: `Hi, I'm interested in "${product.name}". Please share more details.` },
   });
 
   const onSubmit = async (data: FormData) => {
-    setLoading(true);
+    setSubmitting(true);
     try {
       const res = await fetch('/api/inquiries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, productName: product.name }),
+        body: JSON.stringify({ ...data, productName: product?.name }),
       });
       if (res.ok) { toast.success('Inquiry sent!'); reset(); }
       else toast.error('Error sending inquiry');
     } catch { toast.error('Network error'); }
-    setLoading(false);
+    setSubmitting(false);
   };
+
+  if (notFound) {
+    return (
+      <div className="min-h-screen bg-brand-cream pt-32 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="font-serif text-4xl text-brand-black mb-4">Product Not Found</h1>
+          <Link href="/collection" className="btn-primary">← Back to Collection</Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-brand-cream pt-32 flex items-center justify-center">
+        <p className="font-sans text-brand-gray animate-pulse">Loading product...</p>
+      </div>
+    );
+  }
+
+  const images = product.images?.length > 0 ? product.images : ['/cat-showpieces.png'];
 
   return (
     <div className="min-h-screen bg-brand-cream pt-24">
@@ -89,7 +123,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
             </div>
             {images.length > 1 && (
               <div className="flex gap-2">
-                {images.map((img, i) => (
+                {images.map((img: string, i: number) => (
                   <button key={i} onClick={() => setActiveImg(i)} className={`relative w-16 h-16 overflow-hidden border-2 transition-all ${activeImg === i ? 'border-brand-black' : 'border-transparent'}`}>
                     <Image src={img || '/cat-showpieces.png'} alt="" fill className="object-cover" onError={(e) => { (e.target as HTMLImageElement).src = '/cat-showpieces.png'; }} />
                   </button>
@@ -103,7 +137,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
             <span className="label-chip mb-4 inline-block">{product.category}</span>
             <h1 className="font-serif text-4xl md:text-5xl text-brand-black mb-4">{product.name}</h1>
             <div className="divider-line mb-6" />
-            <p className="font-sans text-brand-charcoal font-[300] leading-relaxed mb-8">{product.description}</p>
+            <p className="font-sans text-brand-charcoal font-[300] leading-relaxed mb-8">{product.description || product.shortDescription}</p>
 
             {/* Details */}
             <div className="space-y-3 mb-8 bg-brand-beige p-5">
@@ -121,7 +155,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                   <span className="text-brand-black">{product.material}</span>
                 </div>
               )}
-              {Object.values(product.dimensions || {}).some(Boolean) && (
+              {product.dimensions && Object.values(product.dimensions).some(Boolean) && (
                 <div className="flex items-start gap-3 text-sm font-sans">
                   <Ruler size={14} className="text-brand-gold mt-0.5" />
                   <span className="text-brand-gray">Dimensions:</span>
@@ -133,9 +167,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
             </div>
 
             {/* Tags */}
-            {product.tags.length > 0 && (
+            {product.tags?.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-8">
-                {product.tags.map((tag) => (
+                {product.tags.map((tag: string) => (
                   <span key={tag} className="label-chip text-[10px]">{tag}</span>
                 ))}
               </div>
@@ -144,7 +178,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
             {/* Actions */}
             <div className="flex gap-3">
               <a
-                href={`https://wa.me/919876543210?text=Hi, I'm interested in: ${product.name}`}
+                href={`https://wa.me/${WHATSAPP}?text=Hi, I'm interested in: ${product.name}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-whatsapp flex-1 justify-center"
@@ -157,12 +191,26 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
             <div className="mt-10 pt-10 border-t border-brand-sand">
               <h3 className="font-serif text-2xl text-brand-black mb-6">Send Inquiry</h3>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-                <input {...register('name')} placeholder="Your Name *" className="input-luxury" />
-                <input {...register('email')} placeholder="Email *" className="input-luxury" />
+                <div>
+                  <input {...register('name')} placeholder="Your Name *" className="input-luxury" />
+                  {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
+                </div>
+                <div>
+                  <input {...register('email')} placeholder="Email *" className="input-luxury" />
+                  {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
+                </div>
                 <input {...register('phone')} placeholder="Phone (optional)" className="input-luxury" />
-                <textarea {...register('message')} rows={3} className="input-luxury resize-none" />
-                <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
-                  <Send size={14} /> {loading ? 'Sending...' : 'Send Inquiry'}
+                <div>
+                  <textarea
+                    {...register('message')}
+                    rows={3}
+                    className="input-luxury resize-none"
+                    placeholder={`Hi, I'm interested in "${product.name}". Please share more details.`}
+                  />
+                  {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message.message}</p>}
+                </div>
+                <button type="submit" disabled={submitting} className="btn-primary w-full justify-center">
+                  <Send size={14} /> {submitting ? 'Sending...' : 'Send Inquiry'}
                 </button>
               </form>
             </div>
@@ -174,10 +222,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           <div>
             <h2 className="font-serif text-3xl text-brand-black mb-8">You May Also Like</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {related.map((p) => (
+              {related.map((p: any) => (
                 <Link key={p.slug} href={`/collection/${p.slug}`} className="group">
                   <div className="relative aspect-[3/4] overflow-hidden bg-brand-beige mb-3">
-                    <Image src={p.images[0] || '/cat-showpieces.png'} alt={p.name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" onError={(e) => { (e.target as HTMLImageElement).src = '/cat-showpieces.png'; }} />
+                    <Image src={p.images?.[0] || '/cat-showpieces.png'} alt={p.name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" onError={(e) => { (e.target as HTMLImageElement).src = '/cat-showpieces.png'; }} />
                   </div>
                   <h4 className="font-serif text-base text-brand-black">{p.name}</h4>
                   <p className="font-sans text-xs text-brand-gray">{p.category}</p>

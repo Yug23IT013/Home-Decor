@@ -1,28 +1,59 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, X, ZoomIn } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const mockGallery = [
-  { _id: '1', image: '/gallery-1.png', title: 'Living Room Elegance', category: 'Interior', featured: true },
-  { _id: '2', image: '/gallery-2.png', title: 'Bedroom Details', category: 'Bedroom', featured: false },
-  { _id: '3', image: '/hero-interior.png', title: 'Arched Luxury', category: 'Living Room', featured: true },
-  { _id: '4', image: '/cat-wall-decor.png', title: 'Wall Art Display', category: 'Wall Decor', featured: false },
-  { _id: '5', image: '/style-modern-minimal.png', title: 'Minimal Spaces', category: 'Interior', featured: false },
-  { _id: '6', image: '/style-luxury-gold.png', title: 'Gold Accents', category: 'Luxury', featured: true },
+  { _id: 'mock-1', image: '/gallery-1.png', title: 'Living Room Elegance', category: 'Interior', featured: true },
+  { _id: 'mock-2', image: '/gallery-2.png', title: 'Bedroom Details', category: 'Bedroom', featured: false },
+  { _id: 'mock-3', image: '/hero-interior.png', title: 'Arched Luxury', category: 'Living Room', featured: true },
+  { _id: 'mock-4', image: '/cat-wall-decor.png', title: 'Wall Art Display', category: 'Wall Decor', featured: false },
+  { _id: 'mock-5', image: '/style-modern-minimal.png', title: 'Minimal Spaces', category: 'Interior', featured: false },
+  { _id: 'mock-6', image: '/style-luxury-gold.png', title: 'Gold Accents', category: 'Luxury', featured: true },
 ];
 
 export default function AdminGalleryPage() {
-  const [items, setItems] = useState(mockGallery);
+  const [items, setItems] = useState<any[]>(mockGallery);
   const [preview, setPreview] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleDelete = (id: string) => {
+  const fetchItems = () => {
+    fetch('/api/gallery')
+      .then(res => res.json())
+      .then(data => {
+        const fetchedItems = data.items || [];
+        setItems(fetchedItems.length > 0 ? [...fetchedItems, ...mockGallery] : mockGallery);
+        setLoading(false);
+      })
+      .catch(() => {
+        setItems(mockGallery);
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
+  const handleDelete = async (id: string) => {
     if (!confirm('Delete this image?')) return;
+    
+    // Optimistic UI update
+    const previousItems = [...items];
     setItems((prev) => prev.filter((i) => i._id !== id));
-    toast.success('Image removed');
+    
+    try {
+      const res = await fetch(`/api/gallery/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete');
+      toast.success('Image removed');
+    } catch (error) {
+      setItems(previousItems); // Revert on failure
+      toast.error('Failed to delete image');
+    }
   };
 
   return (
@@ -32,9 +63,9 @@ export default function AdminGalleryPage() {
           <h1 className="font-serif text-3xl text-brand-black">Gallery</h1>
           <p className="font-sans text-sm text-brand-gray mt-1">{items.length} images</p>
         </div>
-        <button className="btn-primary">
+        <Link href="/admin/gallery/new" className="btn-primary flex items-center gap-2">
           <Plus size={16} /> Add Image
-        </button>
+        </Link>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

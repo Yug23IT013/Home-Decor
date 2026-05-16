@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Search, SlidersHorizontal, X, MessageCircle, ChevronDown } from 'lucide-react';
-import { CATEGORIES, STYLES, MATERIALS } from '@/lib/seedData';
+
 
 type Product = {
   name: string;
@@ -56,9 +56,9 @@ export default function CollectionPage() {
   const hasFilters = search || category || style || material;
 
   return (
-    <div className="min-h-screen bg-brand-cream pt-24">
+    <div className="min-h-screen bg-brand-cream">
       {/* Header */}
-      <div className="bg-brand-black py-20">
+      <div className="bg-brand-black pt-32 pb-20">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <motion.p
             className="font-sans text-xs tracking-[0.3em] uppercase text-white/40 mb-3"
@@ -145,7 +145,7 @@ export default function CollectionPage() {
                 <div>
                   <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-brand-gray mb-3">Category</p>
                   <div className="space-y-2">
-                    {['', ...CATEGORIES.map(c => c.name)].map((cat) => (
+                    {['', ...Array.from(new Set(products.map(p => p.category))).filter(Boolean)].map((cat) => (
                       <button
                         key={cat || 'all'}
                         onClick={() => setCategory(cat)}
@@ -160,7 +160,7 @@ export default function CollectionPage() {
                 <div>
                   <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-brand-gray mb-3">Style</p>
                   <div className="space-y-2">
-                    {['', ...STYLES.map(s => s.name)].map((s) => (
+                    {['', ...Array.from(new Set(products.map(p => p.style))).filter(Boolean)].map((s) => (
                       <button
                         key={s || 'all'}
                         onClick={() => setStyle(s)}
@@ -175,7 +175,7 @@ export default function CollectionPage() {
                 <div>
                   <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-brand-gray mb-3">Material</p>
                   <div className="space-y-2">
-                    {['', ...MATERIALS].map((m) => (
+                    {['', ...Array.from(new Set(products.map(p => p.material))).filter(Boolean)].map((m) => (
                       <button
                         key={m || 'all'}
                         onClick={() => setMaterial(m)}
