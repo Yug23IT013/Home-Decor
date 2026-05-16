@@ -11,12 +11,12 @@ const quickLinks = [
 ];
 
 const categories = [
-  { href: '/categories/wall-decor', label: 'Wall Decor' },
-  { href: '/categories/showpieces', label: 'Showpieces' },
-  { href: '/categories/mirrors', label: 'Mirrors' },
-  { href: '/categories/table-decor', label: 'Table Decor' },
-  { href: '/categories/handmade-decor', label: 'Handmade Decor' },
-  { href: '/categories/luxury-accessories', label: 'Luxury Accessories' },
+  { href: '/collection?category=Wall Decor', label: 'Wall Decor' },
+  { href: '/collection?category=Showpieces', label: 'Showpieces' },
+  { href: '/collection?category=Mirrors', label: 'Mirrors' },
+  { href: '/collection?category=Table Decor', label: 'Table Decor' },
+  { href: '/collection?category=Handmade Decor', label: 'Handmade Decor' },
+  { href: '/collection?category=Luxury Accessories', label: 'Luxury Accessories' },
 ];
 
 export default function Footer() {

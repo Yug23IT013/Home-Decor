@@ -22,7 +22,7 @@ function StyleCard({ style, i, className = '' }: { style: typeof styles[0]; i: n
       transition={{ duration: 0.65, delay: i * 0.08 }}
       className={`relative overflow-hidden group ${className}`}
     >
-      <Link href={`/collection?style=${style.slug}`} className="block w-full h-full">
+      <Link href={`/collection?style=${style.slug}`} className="block w-full h-full relative">
         <Image
           src={style.image}
           alt={style.name}

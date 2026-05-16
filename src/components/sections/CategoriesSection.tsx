@@ -51,7 +51,7 @@ export default function CategoriesSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: i * 0.08 }}
             >
-              <Link href={`/categories/${cat.slug}`} className="group block relative overflow-hidden aspect-[3/4] bg-brand-beige">
+              <Link href={`/collection?category=${cat.name}`} className="group block relative overflow-hidden aspect-[3/4] bg-brand-beige">
                 <Image
                   src={cat.image || '/cat-showpieces.png'}
                   alt={cat.name}

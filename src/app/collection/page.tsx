@@ -7,6 +7,9 @@ import Link from 'next/link';
 import { Search, SlidersHorizontal, X, MessageCircle, ChevronDown } from 'lucide-react';
 
 
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+
 type Product = {
   name: string;
   slug: string;
@@ -25,25 +28,43 @@ const SORT_OPTIONS = [
   { value: 'featured', label: 'Featured' },
 ];
 
-export default function CollectionPage() {
+function CollectionContent() {
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState('');
-
-  useEffect(() => {
-    fetch('/api/products').then(r => r.json()).then(data => setProducts(data.products || []));
-  }, []);
   const [category, setCategory] = useState('');
   const [style, setStyle] = useState('');
   const [material, setMaterial] = useState('');
   const [sort, setSort] = useState('newest');
   const [filtersOpen, setFiltersOpen] = useState(false);
 
+  useEffect(() => {
+    fetch('/api/products').then(r => r.json()).then(data => setProducts(data.products || []));
+  }, []);
+
+  // Sync state with URL params
+  useEffect(() => {
+    const catParam = searchParams.get('category');
+    const styleParam = searchParams.get('style');
+    if (catParam) {
+      setCategory(catParam);
+      setFiltersOpen(true);
+    }
+    if (styleParam) {
+      setStyle(styleParam);
+      setFiltersOpen(true);
+    }
+  }, [searchParams]);
+
   const filtered = products.filter((p) => {
     const q = search.toLowerCase();
+    const matchesCategory = !category || p.category?.toLowerCase() === category.toLowerCase();
+    const matchesStyle = !style || p.style?.toLowerCase() === style.toLowerCase();
+    
     return (
       (!search || p.name?.toLowerCase().includes(q) || p.shortDescription?.toLowerCase().includes(q) || (p.tags || []).some((t: string) => t.toLowerCase().includes(q))) &&
-      (!category || p.category === category) &&
-      (!style || p.style === style) &&
+      matchesCategory &&
+      matchesStyle &&
       (!material || p.material === material)
     );
   }).sort((a, b) => {
@@ -149,7 +170,7 @@ export default function CollectionPage() {
                       <button
                         key={cat || 'all'}
                         onClick={() => setCategory(cat)}
-                        className={`block text-left font-sans text-xs w-full transition-colors duration-200 ${category === cat ? 'text-brand-black font-[500]' : 'text-brand-gray hover:text-brand-black'}`}
+                        className={`block text-left font-sans text-xs w-full transition-colors duration-200 ${category?.toLowerCase() === cat?.toLowerCase() ? 'text-brand-black font-[500]' : 'text-brand-gray hover:text-brand-black'}`}
                       >
                         {cat || 'All Categories'}
                       </button>
@@ -164,7 +185,7 @@ export default function CollectionPage() {
                       <button
                         key={s || 'all'}
                         onClick={() => setStyle(s)}
-                        className={`block text-left font-sans text-xs w-full transition-colors duration-200 ${style === s ? 'text-brand-black font-[500]' : 'text-brand-gray hover:text-brand-black'}`}
+                        className={`block text-left font-sans text-xs w-full transition-colors duration-200 ${style?.toLowerCase() === s?.toLowerCase() ? 'text-brand-black font-[500]' : 'text-brand-gray hover:text-brand-black'}`}
                       >
                         {s || 'All Styles'}
                       </button>
@@ -255,5 +276,13 @@ export default function CollectionPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function CollectionPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-brand-cream pt-32 text-center font-serif text-xl">Loading Collection...</div>}>
+      <CollectionContent />
+    </Suspense>
   );
 }
