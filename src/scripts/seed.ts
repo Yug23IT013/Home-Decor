@@ -5,7 +5,7 @@
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 import mongoose from 'mongoose';
-import { SEED_PRODUCTS, SEED_TESTIMONIALS } from '../lib/seedData';
+import { CATEGORIES, SEED_PRODUCTS, SEED_TESTIMONIALS } from '../lib/seedData';
 
 async function seed() {
   const uri = process.env.MONGODB_URI;
@@ -17,11 +17,21 @@ async function seed() {
   // Lazy load models
   const { default: Product } = await import('../models/Product');
   const { default: Testimonial } = await import('../models/Testimonial');
+  const { default: Category } = await import('../models/Category');
+  const { default: Gallery } = await import('../models/Gallery');
 
   // Clear existing
   await Product.deleteMany({});
   await Testimonial.deleteMany({});
+  await Category.deleteMany({});
+  await Gallery.deleteMany({});
   console.log('Cleared existing data');
+
+  // Seed Categories
+  for (const cat of CATEGORIES) {
+    await Category.create(cat);
+  }
+  console.log(`Seeded ${CATEGORIES.length} categories`);
 
   // Seed products
   for (const p of SEED_PRODUCTS) {
