@@ -13,10 +13,21 @@ export default function AdminTestimonialsPage() {
     fetch('/api/testimonials').then(r => r.json()).then(data => setTestimonials(data.testimonials || []));
   }, []);
 
-  const handleDelete = (i: number) => {
+  const handleDelete = async (id: string) => {
     if (!confirm('Delete this testimonial?')) return;
-    setTestimonials((prev) => prev.filter((_, idx) => idx !== i));
-    toast.success('Deleted');
+    
+    // Optimistic update
+    setTestimonials((prev) => prev.filter((t) => t._id !== id));
+    
+    try {
+      const res = await fetch(`/api/testimonials/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete');
+      toast.success('Deleted');
+    } catch (error) {
+      toast.error('Failed to delete');
+      // Re-fetch to sync
+      fetch('/api/testimonials').then(r => r.json()).then(data => setTestimonials(data.testimonials || []));
+    }
   };
 
   return (
@@ -52,8 +63,18 @@ export default function AdminTestimonialsPage() {
                 </div>
               </div>
               <div className="flex gap-2">
-                <button className="p-1.5 text-brand-gray hover:text-brand-black transition-colors"><Edit2 size={14} /></button>
-                <button onClick={() => handleDelete(i)} className="p-1.5 text-brand-gray hover:text-red-500 transition-colors"><Trash2 size={14} /></button>
+                <Link 
+                  href={`/admin/testimonials/edit/${t._id}`}
+                  className="p-1.5 text-brand-gray hover:text-brand-black transition-colors"
+                >
+                  <Edit2 size={14} />
+                </Link>
+                <button 
+                  onClick={() => handleDelete(t._id)} 
+                  className="p-1.5 text-brand-gray hover:text-red-500 transition-colors"
+                >
+                  <Trash2 size={14} />
+                </button>
               </div>
             </div>
           </motion.div>

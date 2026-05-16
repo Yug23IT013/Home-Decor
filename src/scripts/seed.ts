@@ -5,7 +5,7 @@
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 import mongoose from 'mongoose';
-import { CATEGORIES, SEED_PRODUCTS, SEED_TESTIMONIALS } from '../lib/seedData';
+import { CATEGORIES, SEED_PRODUCTS, SEED_TESTIMONIALS, SEED_GALLERY } from '../lib/seedData';
 
 async function seed() {
   const uri = process.env.MONGODB_URI;
@@ -44,6 +44,12 @@ async function seed() {
     await Testimonial.create({ ...t, active: true });
   }
   console.log(`Seeded ${SEED_TESTIMONIALS.length} testimonials`);
+
+  // Seed gallery
+  for (const item of SEED_GALLERY) {
+    await Gallery.create({ ...item, active: true });
+  }
+  console.log(`Seeded ${SEED_GALLERY.length} gallery items`);
 
   await mongoose.disconnect();
   console.log('Done!');

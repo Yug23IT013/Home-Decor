@@ -1,20 +1,40 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, Save, Upload, X, Star } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { ArrowLeft, Save, Star } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
-export default function NewTestimonialPage() {
+export default function EditTestimonialPage() {
   const router = useRouter();
+  const params = useParams();
+  const id = params.id as string;
+  
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
   const [name, setName] = useState('');
-  const [role, setRole] = useState('Customer');
+  const [role, setRole] = useState('');
   const [review, setReview] = useState('');
   const [rating, setRating] = useState(5);
 
-
+  useEffect(() => {
+    fetch(`/api/testimonials/${id}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.testimonial) {
+          setName(data.testimonial.name);
+          setRole(data.testimonial.role || '');
+          setReview(data.testimonial.review);
+          setRating(data.testimonial.rating);
+        } else {
+          toast.error('Testimonial not found');
+          router.push('/admin/testimonials');
+        }
+      })
+      .catch(() => toast.error('Error fetching testimonial'))
+      .finally(() => setFetching(false));
+  }, [id, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,23 +44,31 @@ export default function NewTestimonialPage() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/testimonials', {
-        method: 'POST',
+      const res = await fetch(`/api/testimonials/${id}`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, role, review, rating }),
       });
 
-      if (!res.ok) throw new Error('Failed to create testimonial');
+      if (!res.ok) throw new Error('Failed to update testimonial');
       
-      toast.success('Testimonial added successfully');
+      toast.success('Testimonial updated successfully');
       router.push('/admin/testimonials');
       router.refresh();
     } catch (error) {
-      toast.error('Error adding testimonial');
+      toast.error('Error updating testimonial');
     } finally {
       setLoading(false);
     }
   };
+
+  if (fetching) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="w-8 h-8 border-4 border-brand-gold border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl">
@@ -49,8 +77,8 @@ export default function NewTestimonialPage() {
           <ArrowLeft size={16} />
         </Link>
         <div>
-          <h1 className="font-serif text-3xl text-brand-black">Add Review</h1>
-          <p className="font-sans text-sm text-brand-gray mt-1">Add a new client testimonial</p>
+          <h1 className="font-serif text-3xl text-brand-black">Edit Review</h1>
+          <p className="font-sans text-sm text-brand-gray mt-1">Update client testimonial</p>
         </div>
       </div>
 
@@ -76,8 +104,6 @@ export default function NewTestimonialPage() {
             placeholder="e.g. Interior Designer, London"
           />
         </div>
-
-
 
         <div>
           <label className="block font-sans text-[10px] tracking-[0.15em] uppercase text-brand-gray mb-1.5">Rating (1-5)</label>
@@ -108,7 +134,7 @@ export default function NewTestimonialPage() {
 
         <div className="mt-10 pt-6 border-t border-brand-sand flex justify-end">
           <button type="submit" disabled={loading} className="btn-primary">
-            <Save size={16} /> {loading ? 'Saving...' : 'Save Review'}
+            <Save size={16} /> {loading ? 'Saving...' : 'Update Review'}
           </button>
         </div>
       </form>

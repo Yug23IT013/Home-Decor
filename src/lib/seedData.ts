@@ -162,3 +162,42 @@ export const SEED_TESTIMONIALS = [
     rating: 5,
   },
 ];
+
+export const SEED_GALLERY = [
+  {
+    title: 'Living Room Elegance',
+    category: 'Interior',
+    image: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908782/ambica-home-decor/seed/gallery-1.jpg',
+    featured: true,
+  },
+  {
+    title: 'Bedroom Details',
+    category: 'Bedroom',
+    image: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908782/ambica-home-decor/seed/gallery-2.jpg',
+    featured: false,
+  },
+  {
+    title: 'Arched Luxury',
+    category: 'Living Room',
+    image: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908784/ambica-home-decor/seed/hero-interior.jpg',
+    featured: true,
+  },
+  {
+    title: 'Wall Art Collection',
+    category: 'Wall Decor',
+    image: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908780/ambica-home-decor/seed/cat-wall-decor.jpg',
+    featured: false,
+  },
+  {
+    title: 'Showpiece Display',
+    category: 'Showpieces',
+    image: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908779/ambica-home-decor/seed/cat-showpieces.jpg',
+    featured: true,
+  },
+  {
+    title: 'Mirror Gallery',
+    category: 'Mirrors',
+    image: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908778/ambica-home-decor/seed/cat-mirrors.jpg',
+    featured: false,
+  },
+];

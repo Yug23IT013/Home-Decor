@@ -5,8 +5,11 @@ import { auth } from '@/lib/auth';
 import { z } from 'zod';
 
 const gallerySchema = z.object({
+  title: z.string().min(2).optional().default('New Gallery Item'),
   image: z.string().url(),
-  active: z.boolean().optional(),
+  category: z.string().optional().default('Interior'),
+  featured: z.boolean().optional().default(false),
+  active: z.boolean().optional().default(true),
 });
 
 export const dynamic = 'force-dynamic';
@@ -15,7 +18,7 @@ export async function GET() {
   try {
     await connectDB();
     const items = await Gallery.find({ active: true }).sort({ createdAt: -1 });
-    return NextResponse.json({ items });
+    return NextResponse.json({ gallery: items });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

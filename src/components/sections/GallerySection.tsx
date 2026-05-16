@@ -9,20 +9,20 @@ import { X, ZoomIn } from 'lucide-react';
 type GalleryItem = {
   _id: string;
   title: string;
-  imageUrl: string;
+  image: string;
   caption?: string;
   category?: string;
 };
 
 const FALLBACK_ITEMS: GalleryItem[] = [
-  { _id: '1', imageUrl: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908782/ambica-home-decor/seed/gallery-1.jpg', title: 'Living Room Elegance', category: 'Interior' },
-  { _id: '2', imageUrl: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908782/ambica-home-decor/seed/gallery-2.jpg', title: 'Bedroom Details', category: 'Bedroom' },
-  { _id: '3', imageUrl: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908784/ambica-home-decor/seed/hero-interior.jpg', title: 'Arched Luxury', category: 'Living Room' },
-  { _id: '4', imageUrl: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908780/ambica-home-decor/seed/cat-wall-decor.jpg', title: 'Wall Art Collection', category: 'Wall Decor' },
-  { _id: '5', imageUrl: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908779/ambica-home-decor/seed/cat-showpieces.jpg', title: 'Showpiece Display', category: 'Showpieces' },
-  { _id: '6', imageUrl: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908778/ambica-home-decor/seed/cat-mirrors.jpg', title: 'Mirror Gallery', category: 'Mirrors' },
-  { _id: '7', imageUrl: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908787/ambica-home-decor/seed/style-modern-minimal.jpg', title: 'Minimal Spaces', category: 'Interior' },
-  { _id: '8', imageUrl: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908786/ambica-home-decor/seed/style-luxury-gold.jpg', title: 'Gold Accents', category: 'Luxury' },
+  { _id: '1', image: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908782/ambica-home-decor/seed/gallery-1.jpg', title: 'Living Room Elegance', category: 'Interior' },
+  { _id: '2', image: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908782/ambica-home-decor/seed/gallery-2.jpg', title: 'Bedroom Details', category: 'Bedroom' },
+  { _id: '3', image: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908784/ambica-home-decor/seed/hero-interior.jpg', title: 'Arched Luxury', category: 'Living Room' },
+  { _id: '4', image: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908780/ambica-home-decor/seed/cat-wall-decor.jpg', title: 'Wall Art Collection', category: 'Wall Decor' },
+  { _id: '5', image: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908779/ambica-home-decor/seed/cat-showpieces.jpg', title: 'Showpiece Display', category: 'Showpieces' },
+  { _id: '6', image: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908778/ambica-home-decor/seed/cat-mirrors.jpg', title: 'Mirror Gallery', category: 'Mirrors' },
+  { _id: '7', image: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908787/ambica-home-decor/seed/style-modern-minimal.jpg', title: 'Minimal Spaces', category: 'Interior' },
+  { _id: '8', image: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908786/ambica-home-decor/seed/style-luxury-gold.jpg', title: 'Gold Accents', category: 'Luxury' },
 ];
 
 function GalleryImg({
@@ -57,7 +57,7 @@ export default function GallerySection({
   }, []);
 
   const items = galleryItems.slice(0, limit);
-  const src = (item: GalleryItem) => item.imageUrl || '/gallery-1.png';
+  const src = (item: GalleryItem) => item.image || '/gallery-1.png';
 
   const Card = ({ item, i, className }: { item: GalleryItem; i: number; className: string }) => (
     <motion.div

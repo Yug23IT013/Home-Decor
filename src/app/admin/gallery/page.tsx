@@ -7,17 +7,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, X, ZoomIn } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const mockGallery = [
-  { _id: 'mock-1', image: '/gallery-1.png', title: 'Living Room Elegance', category: 'Interior', featured: true },
-  { _id: 'mock-2', image: '/gallery-2.png', title: 'Bedroom Details', category: 'Bedroom', featured: false },
-  { _id: 'mock-3', image: '/hero-interior.png', title: 'Arched Luxury', category: 'Living Room', featured: true },
-  { _id: 'mock-4', image: '/cat-wall-decor.png', title: 'Wall Art Display', category: 'Wall Decor', featured: false },
-  { _id: 'mock-5', image: '/style-modern-minimal.png', title: 'Minimal Spaces', category: 'Interior', featured: false },
-  { _id: 'mock-6', image: '/style-luxury-gold.png', title: 'Gold Accents', category: 'Luxury', featured: true },
-];
+// No mock gallery needed as we have seed data and actual database items
 
 export default function AdminGalleryPage() {
-  const [items, setItems] = useState<any[]>(mockGallery);
+  const [items, setItems] = useState<any[]>([]);
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -25,12 +18,11 @@ export default function AdminGalleryPage() {
     fetch('/api/gallery')
       .then(res => res.json())
       .then(data => {
-        const fetchedItems = data.items || [];
-        setItems(fetchedItems.length > 0 ? [...fetchedItems, ...mockGallery] : mockGallery);
+        setItems(data.gallery || []);
         setLoading(false);
       })
       .catch(() => {
-        setItems(mockGallery);
+        setItems([]);
         setLoading(false);
       });
   };
@@ -97,8 +89,8 @@ export default function AdminGalleryPage() {
                 <Trash2 size={16} />
               </button>
             </div>
-            <p className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent text-white font-sans text-xs truncate">
-              {item.title}
+            <p className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white font-sans text-xs font-[500]">
+              {item.title || 'Untitled Space'}
             </p>
           </motion.div>
         ))}
