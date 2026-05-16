@@ -8,13 +8,16 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState({ products: 0, newInquiries: 0, gallery: 0, testimonials: 0 });
   const [recentInquiries, setRecentInquiries] = useState<any[]>([]);
 
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    // Fetch all counts in parallel
+    setLoading(true);
+    // Fetch all counts in parallel with individual error catching
     Promise.all([
-      fetch('/api/products').then(r => r.json()),
-      fetch('/api/inquiries').then(r => r.json()),
-      fetch('/api/gallery').then(r => r.json()),
-      fetch('/api/testimonials').then(r => r.json()),
+      fetch('/api/products').then(r => r.ok ? r.json() : { products: [] }).catch(() => ({ products: [] })),
+      fetch('/api/inquiries').then(r => r.ok ? r.json() : { inquiries: [] }).catch(() => ({ inquiries: [] })),
+      fetch('/api/gallery').then(r => r.ok ? r.json() : { gallery: [] }).catch(() => ({ gallery: [] })),
+      fetch('/api/testimonials').then(r => r.ok ? r.json() : { testimonials: [] }).catch(() => ({ testimonials: [] })),
     ]).then(([products, inquiries, gallery, testimonials]) => {
       const allInquiries = inquiries.inquiries || [];
       setStats({
@@ -24,7 +27,7 @@ export default function AdminDashboard() {
         testimonials: (testimonials.testimonials || []).length,
       });
       setRecentInquiries(allInquiries.slice(0, 5));
-    });
+    }).finally(() => setLoading(false));
   }, []);
 
   const formatTime = (iso: string) => {
@@ -52,9 +55,18 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="font-serif text-3xl text-brand-black">Dashboard</h1>
-        <p className="font-sans text-sm text-brand-gray mt-1">Welcome back to Ambica Home Decor Admin</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="font-serif text-3xl text-brand-black">Dashboard</h1>
+          <p className="font-sans text-sm text-brand-gray mt-1">Welcome back to Ambica Home Decor Admin</p>
+        </div>
+        {loading && (
+          <div className="flex items-center gap-2 text-brand-gold">
+            <div className="w-2 h-2 bg-brand-gold animate-bounce" />
+            <div className="w-2 h-2 bg-brand-gold animate-bounce delay-75" />
+            <div className="w-2 h-2 bg-brand-gold animate-bounce delay-150" />
+          </div>
+        )}
       </div>
 
       {/* Stats Grid */}

@@ -158,9 +158,14 @@ export default function Footer() {
       {/* Bottom Bar */}
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="font-sans text-xs text-white/30">
-            © {new Date().getFullYear()} Ambica Home Decor. All rights reserved.
-          </p>
+          <div className="flex items-center gap-6">
+            <p className="font-sans text-xs text-white/30">
+              © {new Date().getFullYear()} Ambica Home Decor. All rights reserved.
+            </p>
+            <Link href="/admin" className="font-sans text-[10px] tracking-wider uppercase text-white/10 hover:text-white/40 transition-colors">
+              Admin
+            </Link>
+          </div>
           <p className="font-sans text-xs text-white/30">
             Crafted with passion for beautiful spaces.
           </p>
