@@ -19,7 +19,7 @@ export default function CategoriesSection() {
     fetch('/api/categories')
       .then(res => res.json())
       .then(data => {
-        const fetched = data.categories || [];
+        const fetched = (data.categories || []).slice(0, 8);
         setCategories(fetched.length > 0 ? fetched : FALLBACK_CATEGORIES);
       })
       .catch(() => setCategories(FALLBACK_CATEGORIES));
