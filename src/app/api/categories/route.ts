@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     await connectDB();
-    const categories = await Category.find().sort({ name: 1 });
+    const categories = await Category.find({ active: true }).sort({ name: 1 });
     return NextResponse.json({ categories });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });

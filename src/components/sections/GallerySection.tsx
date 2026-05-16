@@ -15,14 +15,14 @@ type GalleryItem = {
 };
 
 const FALLBACK_ITEMS: GalleryItem[] = [
-  { _id: '1', imageUrl: '/gallery-1.png', title: 'Living Room Elegance', category: 'Interior' },
-  { _id: '2', imageUrl: '/gallery-2.png', title: 'Bedroom Details', category: 'Bedroom' },
-  { _id: '3', imageUrl: '/hero-interior.png', title: 'Arched Luxury', category: 'Living Room' },
-  { _id: '4', imageUrl: '/cat-wall-decor.png', title: 'Wall Art Collection', category: 'Wall Decor' },
-  { _id: '5', imageUrl: '/cat-showpieces.png', title: 'Showpiece Display', category: 'Showpieces' },
-  { _id: '6', imageUrl: '/cat-mirrors.png', title: 'Mirror Gallery', category: 'Mirrors' },
-  { _id: '7', imageUrl: '/style-modern-minimal.png', title: 'Minimal Spaces', category: 'Interior' },
-  { _id: '8', imageUrl: '/style-luxury-gold.png', title: 'Gold Accents', category: 'Luxury' },
+  { _id: '1', imageUrl: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908782/ambica-home-decor/seed/gallery-1.jpg', title: 'Living Room Elegance', category: 'Interior' },
+  { _id: '2', imageUrl: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908782/ambica-home-decor/seed/gallery-2.jpg', title: 'Bedroom Details', category: 'Bedroom' },
+  { _id: '3', imageUrl: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908784/ambica-home-decor/seed/hero-interior.jpg', title: 'Arched Luxury', category: 'Living Room' },
+  { _id: '4', imageUrl: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908780/ambica-home-decor/seed/cat-wall-decor.jpg', title: 'Wall Art Collection', category: 'Wall Decor' },
+  { _id: '5', imageUrl: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908779/ambica-home-decor/seed/cat-showpieces.jpg', title: 'Showpiece Display', category: 'Showpieces' },
+  { _id: '6', imageUrl: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908778/ambica-home-decor/seed/cat-mirrors.jpg', title: 'Mirror Gallery', category: 'Mirrors' },
+  { _id: '7', imageUrl: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908787/ambica-home-decor/seed/style-modern-minimal.jpg', title: 'Minimal Spaces', category: 'Interior' },
+  { _id: '8', imageUrl: 'https://res.cloudinary.com/dwsn6smfb/image/upload/v1778908786/ambica-home-decor/seed/style-luxury-gold.jpg', title: 'Gold Accents', category: 'Luxury' },
 ];
 
 function GalleryImg({
@@ -37,9 +37,11 @@ function GalleryImg({
 export default function GallerySection({
   showViewAll = true,
   limit = 8,
+  hideHeader = false,
 }: {
   showViewAll?: boolean;
   limit?: number;
+  hideHeader?: boolean;
 }) {
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [selected, setSelected] = useState<GalleryItem | null>(null);
@@ -84,17 +86,19 @@ export default function GallerySection({
     <section className="py-24 bg-brand-cream" id="gallery">
       <div className="max-w-7xl mx-auto px-6">
         {/* Heading */}
-        <motion.div
-          className="text-center mb-16"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-        >
-          <p className="section-subheading mb-3">Inspiration</p>
-          <div className="divider-line mx-auto mb-4" />
-          <h2 className="section-heading">Interior Gallery</h2>
-        </motion.div>
+        {!hideHeader && (
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <p className="section-subheading mb-3">Inspiration</p>
+            <div className="divider-line mx-auto mb-4" />
+            <h2 className="section-heading">Interior Gallery</h2>
+          </motion.div>
+        )}
 
         {/* Structured editorial grid — 4 columns, 2 rows */}
         {/* Row 1: tall-left | sq | sq | tall-right */}
